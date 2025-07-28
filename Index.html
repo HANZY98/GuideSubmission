@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide: Student Resubmissions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is structured as a task-oriented interactive guide. It starts with a primary choice between the two main workflows ("Request Resubmission After Grading" vs. "Revert Submission Before Grading"). This immediately directs the user to the relevant procedure. Clicking a choice reveals an interactive, step-by-step "wizard" for that workflow. Each step is presented individually with a corresponding visual from the user's screenshots and a clear instruction. This structure was chosen over a static document to reduce cognitive load, prevent procedural errors, and make the process more engaging and easier to follow. The user actively moves through the steps, which reinforces learning. -->
+    <!-- Visualization & Content Choices: The source material is a procedural guide. Info: Two distinct workflows for resubmission. Goal: Teach these procedures clearly. Viz/Presentation Method: Interactive stepper/wizard UI. Interaction: Users click their desired workflow, then use 'Next'/'Previous' buttons to navigate steps. Justification: A stepper is ideal for sequential processes, breaking them into manageable chunks. It's more effective than a long text document. The inclusion of the user-provided images as visual aids for each step directly connects the instruction to the system's UI. Library/Method: Vanilla JS for the interactive logic, HTML/Tailwind for structure and styling. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #F8F7F4;
+            color: #4A4A4A;
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        .choice-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .choice-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .step-image-container {
+            border: 2px dashed #D1D5DB;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary {
+            background-color: #4A90E2;
+            color: #FFFFFF;
+        }
+        .btn-primary:hover {
+            background-color: #357ABD;
+        }
+        .btn-secondary {
+            background-color: #E0E0E0;
+            color: #4A4A4A;
+        }
+        .btn-secondary:hover {
+            background-color: #BDBDBD;
+        }
+        .nav-btn {
+            background-color: #A8DADC;
+            color: #1a3a3a;
+        }
+        .nav-btn:hover {
+            background-color: #83c7c8;
+        }
+        .nav-btn-secondary {
+            background-color: #EAEAEA;
+        }
+        .nav-btn-secondary:hover {
+            background-color: #dcdcdc;
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Guide to Managing Student Resubmissions</h1>
+            <p class="text-lg text-gray-600">An interactive guide to help you handle student submissions correctly.</p>
+        </header>
+
+        <main id="main-content">
+            <!-- Initial Choice Screen -->
+            <div id="choice-screen" class="text-center">
+                <h2 class="text-2xl font-semibold mb-6">What do you need to do?</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <button id="show-workflow-a" class="choice-card bg-white p-8 rounded-xl shadow-md text-left">
+                        <h3 class="text-xl font-bold mb-3 text-gray-800">Request Resubmission After Grading</h3>
+                        <p class="text-gray-600">Use this when a student's work is graded as "Referred" and you need to grant another attempt for academic reasons.</p>
+                    </button>
+                    <button id="show-workflow-b" class="choice-card bg-white p-8 rounded-xl shadow-md text-left">
+                        <h3 class="text-xl font-bold mb-3 text-gray-800">Revert Submission Before Grading</h3>
+                        <p class="text-gray-600">Use this for technical issues (e.g., no cover page, wrong format) to return the submission to a draft state for correction.</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Workflow A: Request Resubmission -->
+            <div id="workflow-a" class="hidden">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                     <button class="mb-6 font-semibold text-blue-600 hover:text-blue-800 back-to-choices">&larr; Back to choices</button>
+                    <h2 class="text-2xl font-bold mb-2">Requesting a Resubmission After Grading</h2>
+                    <p class="text-gray-600 mb-6">Follow these steps when a student's work needs to be resubmitted for academic improvement. All actions are in the right-hand grading panel.</p>
+                    
+                    <div id="workflow-a-step-0" class="workflow-a-step">
+                        <h3 class="text-lg font-semibold mb-3">Before You Begin: Check the Attempt Number</h3>
+                        <p class="mb-4">First, look at the **Attempt settings** in the right-hand panel to see if this is the first submission or a resubmission.</p>
+                        <div class="step-image-container rounded-lg p-4 bg-gray-50 flex justify-center items-center">
+                            <img src="check.png" alt="Check attempt number" class="max-w-full h-auto rounded-md">
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <button class="nav-btn px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-a', 1)">Next Step &rarr;</button>
+                        </div>
+                    </div>
+                    
+                    <div id="workflow-a-step-1" class="workflow-a-step hidden">
+                        <h3 class="text-lg font-semibold mb-3">Step 1 of 4: Change Grade to 'Referred'</h3>
+                        <p class="mb-4">In the grading panel, click the **Grade** dropdown and select **Referred**.</p>
+                        <div class="step-image-container rounded-lg p-4 bg-gray-50 flex justify-center items-center">
+                            <img src="referred.png" alt="Change grade to referred" class="max-w-full h-auto rounded-md">
+                        </div>
+                        <div class="mt-6 flex justify-between">
+                            <button class="nav-btn-secondary px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-a', 0)">&larr; Previous</button>
+                            <button class="nav-btn px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-a', 2)">Next Step &rarr;</button>
+                        </div>
+                    </div>
+                    
+                    <div id="workflow-a-step-2" class="workflow-a-step hidden">
+                        <h3 class="text-lg font-semibold mb-3">Step 2 of 4: Set Workflow State to 'Released'</h3>
+                        <p class="mb-4">Change the **Marking workflow state** to **Released** to make the grade and feedback visible to the student.</p>
+                         <div class="step-image-container rounded-lg p-4 bg-gray-50 flex justify-center items-center">
+                            <img src="released.png" alt="Change workflow state to released" class="max-w-full h-auto rounded-md">
+                        </div>
+                        <div class="mt-6 flex justify-between">
+                            <button class="nav-btn-secondary px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-a', 1)">&larr; Previous</button>
+                            <button class="nav-btn px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-a', 3)">Next Step &rarr;</button>
+                        </div>
+                    </div>
+
+                    <div id="workflow-a-step-3" class="workflow-a-step hidden">
+                        <h3 class="text-lg font-semibold mb-3">Step 3 of 4: Add Feedback</h3>
+                        <p class="mb-4">In the **Feedback comments** box, provide clear, constructive feedback on what the student needs to improve.</p>
+                        <div class="step-image-container rounded-lg p-4 bg-gray-50 flex justify-center items-center">
+                            <img src="feedback.png" alt="Add feedback comments" class="max-w-full h-auto rounded-md">
+                        </div>
+                        <div class="mt-6 flex justify-between">
+                            <button class="nav-btn-secondary px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-a', 2)">&larr; Previous</button>
+                            <button class="nav-btn px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-a', 4)">Next Step &rarr;</button>
+                        </div>
+                    </div>
+
+                    <div id="workflow-a-step-4" class="workflow-a-step hidden">
+                        <h3 class="text-lg font-semibold mb-3">Step 4 of 4: Allow Another Attempt</h3>
+                        <p class="mb-4">In the **Attempt settings** section, change the **Allow another attempt** dropdown to **Yes**. Remember to save your changes.</p>
+                        <div class="step-image-container rounded-lg p-4 bg-gray-50 flex justify-center items-center">
+                           <img src="check_yes.png" alt="Allow another attempt" class="max-w-full h-auto rounded-md">
+                        </div>
+                        <div class="mt-6 flex justify-between">
+                            <button class="nav-btn-secondary px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-a', 3)">&larr; Previous</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Workflow B: Revert to Draft -->
+            <div id="workflow-b" class="hidden">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <button class="mb-6 font-semibold text-blue-600 hover:text-blue-800 back-to-choices">&larr; Back to choices</button>
+                    <h2 class="text-2xl font-bold mb-2">Reverting a Submission to Draft</h2>
+                     <p class="text-gray-600 mb-6">Use this process for technical or formatting issues. This is done from the main grading overview page, not the individual student view.</p>
+                    
+                    <div id="workflow-b-step-0" class="workflow-b-step">
+                        <h3 class="text-lg font-semibold mb-3">Step 1 of 3: Open the Edit Menu</h3>
+                        <p class="mb-4">From the assignment's submission list, find the student and click the **Edit** dropdown menu in their row.</p>
+                        <div class="step-image-container rounded-lg p-4 bg-gray-50 flex justify-center items-center">
+                           <img src="edit.png" alt="Open edit menu" class="max-w-full h-auto rounded-md">
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <button class="nav-btn px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-b', 1)">Next Step &rarr;</button>
+                        </div>
+                    </div>
+                    
+                    <div id="workflow-b-step-1" class="workflow-b-step hidden">
+                        <h3 class="text-lg font-semibold mb-3">Step 2 of 3: Revert the Submission to Draft</h3>
+                        <p class="mb-4">Select **Revert the submission to draft** from the menu. This will unlock the submission for the student to edit.</p>
+                        <div class="step-image-container rounded-lg p-4 bg-gray-50 flex justify-center items-center">
+                            <img src="draft.png" alt="Revert submission to draft" class="max-w-full h-auto rounded-md">
+                        </div>
+                        <div class="mt-6 flex justify-between">
+                            <button class="nav-btn-secondary px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-b', 0)">&larr; Previous</button>
+                            <button class="nav-btn px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-b', 2)">Next Step &rarr;</button>
+                        </div>
+                    </div>
+
+                    <div id="workflow-b-step-2" class="workflow-b-step hidden">
+                        <h3 class="text-lg font-semibold mb-3">Step 3 of 3: Add Submission Comments</h3>
+                        <p class="mb-4">It is crucial to tell the student why their work was reverted. Go to the student's submission page and use the **Submission comments** to leave a clear instruction.</p>
+                         <div class="step-image-container rounded-lg p-4 bg-gray-50 flex justify-center items-center">
+                            <img src="add_comments.png" alt="Add submission comments" class="max-w-full h-auto rounded-md">
+                        </div>
+                        <div class="mt-6 flex justify-between">
+                             <button class="nav-btn-secondary px-6 py-2 rounded-lg font-semibold" onclick="navigate('workflow-b', 1)">&larr; Previous</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const choiceScreen = document.getElementById('choice-screen');
+        const workflowA = document.getElementById('workflow-a');
+        const workflowB = document.getElementById('workflow-b');
+
+        const showWorkflowAButton = document.getElementById('show-workflow-a');
+        const showWorkflowBButton = document.getElementById('show-workflow-b');
+        const backButtons = document.querySelectorAll('.back-to-choices');
+
+        showWorkflowAButton.addEventListener('click', () => {
+            choiceScreen.classList.add('hidden');
+            workflowA.classList.remove('hidden');
+            workflowB.classList.add('hidden');
+        });
+
+        showWorkflowBButton.addEventListener('click', () => {
+            choiceScreen.classList.add('hidden');
+            workflowB.classList.remove('hidden');
+            workflowA.classList.add('hidden');
+        });
+
+        backButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                choiceScreen.classList.remove('hidden');
+                workflowA.classList.add('hidden');
+                workflowB.classList.add('hidden');
+                // Reset steps to the beginning
+                navigate('workflow-a', 0, true);
+                navigate('workflow-b', 0, true);
+            });
+        });
+
+        function navigate(workflowId, nextStepIndex, silent = false) {
+            const steps = document.querySelectorAll(`.${workflowId}-step`);
+            steps.forEach((step, index) => {
+                if (index === nextStepIndex) {
+                    step.classList.remove('hidden');
+                } else {
+                    step.classList.add('hidden');
+                }
+            });
+             if (!silent) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
